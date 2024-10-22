@@ -21,4 +21,3 @@ app.layout = [
 def update_graph(value):
     dff = df[df.country==value]
     return px.line(dff, x='year', y='pop')
-
