@@ -1,0 +1,238 @@
+.sidebar {
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    z-index: 1000;
+    width: 250px;
+    position: fixed;
+}
+.nav-link {
+    color: #333;
+    border-radius: 4px;
+}
+.nav-link:hover {
+    background-color: #e9ecef;
+}
+.nav-link.active {
+    background-color: #007bff;
+    color: white;
+}
+body {
+    background-color: #f8f9fa;
+}
+
+/* assets/styles.css */
+
+/* Existing styles remain, adding/updating the following */
+
+/* Filter section styles */
+.filters-container {
+    margin-bottom: 1rem;
+    padding: 1.2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.filter-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin-bottom: 0.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Modern Date Picker */
+.date-picker-modern {
+    width: 100%;
+}
+
+.DateRangePickerInput {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.DateInput {
+    width: 120px;
+    background: transparent;
+}
+
+.DateInput_input {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+    border: none;
+    background: transparent;
+}
+
+.DateRangePickerInput_arrow {
+    padding: 0 0.5rem;
+}
+
+/* Environment Checkboxes */
+.environment-checkboxes {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.custom-checkbox {
+    margin: 0;
+}
+
+.custom-checkbox .form-check-input {
+    width: 1.2rem;
+    height: 1.2rem;
+    margin-top: 0.2rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.custom-checkbox .form-check-input:checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.custom-checkbox .form-check-label {
+    font-size: 0.9rem;
+    padding-left: 0.5rem;
+    cursor: pointer;
+    color: #4b5563;
+}
+
+/* Modern Select Inputs */
+.modern-select {
+    font-size: 0.9rem;
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.modern-select:hover {
+    border-color: #d1d5db;
+    background-color: #f3f4f6;
+}
+
+.modern-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    outline: none;
+}
+
+/* Additional hover effects */
+.custom-checkbox .form-check-input:hover {
+    border-color: #3b82f6;
+}
+
+.DateRangePickerInput:hover {
+    border-color: #d1d5db;
+}
+
+/* Make the filter card more compact */
+.filters-card {
+    padding: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .environment-checkboxes {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .DateInput {
+        width: 100px;
+    }
+}
+
+
+/* Environment Buttons */
+.environment-buttons {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.env-button {
+    border: 2px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.env-button:hover {
+    background-color: #f3f4f6;
+}
+
+.env-button:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+
+
+
+
+/* Environment Buttons */
+.environment-buttons {
+    display: flex;
+    gap: 0.5rem; /* Reduce the gap for compact appearance */
+    align-items: center;
+}
+
+.env-button {
+    border: 2px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 0.4rem 0.8rem; /* Smaller padding for smaller buttons */
+    font-size: 0.8rem; /* Slightly smaller font for compactness */
+    transition: all 0.2s ease;
+    min-width: 80px; /* Ensures the button width is enough for text visibility */
+}
+
+.env-button:hover {
+    background-color: #f3f4f6;
+}
+
+.env-button:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+/* Adjust Date Picker */
+.date-picker-modern {
+    width: 100%;
+}
+
+.DateRangePickerInput {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+}
+
+.DateInput {
+    width: 100px;
+    background: transparent;
+}
+
+.DateInput_input {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+    border: none;
+    background: transparent;
+}
+
+.DateRangePickerInput_arrow {
+    padding: 0 0.5rem;
+}
+
+.card-style {
+    border: solid black 1px;
+    border-radius: 8px;
+    height: 120px;
+}
