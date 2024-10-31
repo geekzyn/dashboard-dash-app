@@ -19,7 +19,6 @@ body {
     background-color: #f8f9fa;
 }
 
-/* assets/styles.css */
 
 /* Existing styles remain, adding/updating the following */
 
@@ -232,7 +231,38 @@ body {
 }
 
 .card-style {
-    border: solid black 1px;
-    border-radius: 8px;
     height: 120px;
 }
+
+
+
+/* Modern Dropdown Inputs */
+.modern-dropdown {
+    font-size: 0.9rem;
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.modern-dropdown:hover {
+    border-color: #d1d5db;
+    background-color: #f3f4f6;
+}
+.modern-dropdown:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    outline: none;
+}
+.modern-dropdown .dropdown-menu {
+    border-radius: 6px;
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    padding: 0.2rem 0;
+    transition: all 0.2s ease;
+}
+.modern-dropdown .dropdown-item:hover {
+    background-color: #f3f4f6;
+    color: #3b82f6;
+    border-radius: 4px;
+

@@ -1,19 +1,16 @@
 import logging
 import os
-from datetime import date, datetime, timedelta
 
 import dash_bootstrap_components as dbc
 import numpy as np
 import pandas as pd
 import plotly.express as px
-from dash import Dash, Input, Output, callback, dash_table, dcc, html
+from dash import Dash, Input, Output, State, callback, dash_table, dcc, html
 from dotenv import load_dotenv
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
 from dashboards.models import AzureCosts
-from layouts.content import content_layout
-from layouts.sidebar import sidebar_layout
 from utils.database import Database
 
 logging.basicConfig(
@@ -22,268 +19,77 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 load_dotenv()
 
+db = Database(
+    host=os.getenv("DB_HOST"),
+    port=os.getenv("DB_PORT"),
+    database=os.getenv("DB_NAME"),
+    username=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD"),
+)
+
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.LUX])
 server = app.server
 
-sidebar = html.Div(
-    [
-        html.Div(
-            [
-                html.Img(
-                    src="/assets/justice.png",
-                    height="25%",
-                    width="25%",
-                    className="d-block mx-auto mb-2",
-                ),
-                html.Span("360 DASHBOARD", className="fs-4 d-block text-center"),
-            ],
-            className="d-flex flex-column align-items-center mb-4 px-3 py-2",
-        ),
-        html.Hr(),
-        dbc.Nav(
-            [
-                dbc.NavLink(
-                    "AZURE COSTS",
-                    href="#",
-                    className="mb-2",
-                ),
-            ],
-            vertical=True,
-            className="px-3",
-        ),
-    ],
-    className="bg-light sidebar min-vh-100",
-)
 
-filters = dbc.Row(
-    [
-        dbc.Col(
-            [
-                html.Label("DATE", className="filter-label"),
-                dcc.DatePickerRange(
-                    id="date-range",
-                    start_date=date(2024, 1, 1),
-                    end_date=date(2024, 12, 31),
-                    className="date-picker-modern",
-                ),
-            ],
-            width=4,
-        ),
-        dbc.Col(
-            [
-                html.Label("ENVIRONMENT", className="filter-label"),
-                html.Div(
-                    [
-                        dbc.Checkbox(
-                            id="dev-checkbox",
-                            label="DEV",
-                            value=False,
-                            className="custom-checkbox",
-                        ),
-                        dbc.Checkbox(
-                            id="tst-checkbox",
-                            label="TST",
-                            value=False,
-                            className="custom-checkbox",
-                        ),
-                        dbc.Checkbox(
-                            id="acc-checkbox",
-                            label="ACC",
-                            value=False,
-                            className="custom-checkbox",
-                        ),
-                        dbc.Checkbox(
-                            id="prd-checkbox",
-                            label="PRD",
-                            value=False,
-                            className="custom-checkbox",
-                        ),
-                    ],
-                    className="environment-checkboxes",
-                ),
-            ],
-            width=4,
-        ),
-        dbc.Col(
-            [
-                html.Label("APPLICATION", className="filter-label"),
-                dbc.Select(
-                    id="application-select",
-                    options=[{"label": "All", "value": "all"}],
-                    value="all",
-                    className="modern-select",
-                ),
-            ],
-            width=2,
-        ),
-        dbc.Col(
-            [
-                html.Label("CLUSTER", className="filter-label"),
-                dbc.Select(
-                    id="cluster-select",
-                    options=[{"label": "All", "value": "all"}],
-                    value="all",
-                    className="modern-select",
-                ),
-            ],
-            width=2,
-        ),
-    ],
-    className="g-2 align-items-end",
+def fetch_azure_costs_dashboard_parameters():
+    # fetch parametrs to initialize dashboard data
+    try:
+        with db.get_session() as session:
+            applications = session.query(AzureCosts.application).distinct().all()
+            clusters = session.query(AzureCosts.cluster).distinct().all()
+            environments = session.query(AzureCosts.environment).distinct().all()
+            min_date = (
+                session.query(AzureCosts.date)
+                .order_by(AzureCosts.date.asc())
+                .first()[0]
+            )
+            max_date = (
+                session.query(AzureCosts.date)
+                .order_by(AzureCosts.date.desc())
+                .first()[0]
+            )
+        # convert list of tuples to list of strings
+        applications = [app[0] for app in applications if app[0]]
+        clusters = [cluster[0] for cluster in clusters if cluster[0]]
+        # ['devtst', 'prd', 'acc', 'devtest', 'tst', 'dev'] => ['devtst', 'acc', 'prd']
+        environments = ["devtst", "acc", "prd"]
+    except SQLAlchemyError as e:
+        logger.error(f"Error fetching filter options: {str(e)}")
+        applications, clusters, environments, min_date, max_date = (
+            [],
+            [],
+            [],
+            None,
+            None,
+        )
+    return applications, clusters, environments, min_date, max_date
+
+
+unique_apps, unique_clusters, unique_envs, min_date, max_date = (
+    fetch_azure_costs_dashboard_parameters()
 )
 
 
-insights_row_top = dbc.Row(
-    [
-        dbc.Col(
-            dbc.Card(
-                dbc.CardBody(
-                    [
-                        html.Div(
-                            [
-                                html.H6(
-                                    "Total Costs",
-                                    className="text-muted",
-                                ),
-                                html.H2(
-                                    "3.1k",
-                                    id="azure-total-costs",
-                                    className="card-text",
-                                ),
-                            ],
-                            style={
-                                "display": "flex",
-                                "flexDirection": "column",
-                                "justifyContent": "center",
-                                "alignItems": "center",
-                                "height": "100%",
-                            },
-                        )
-                    ],
-                ),
-                color="light",
-                style={"height": "200px"},
-            ),
-            width=4,
-        ),
-        dbc.Col(
-            dbc.Card(
-                dbc.CardBody(
-                    [
-                        html.Div(
-                            [
-                                html.H5(
-                                    "Total Budget",
-                                    className="card-title",
-                                    style={"font-size": "1rem"},
-                                ),
-                                html.P(
-                                    id="azure-total-budget",
-                                    className="card-text",
-                                    style={"font-size": "2rem"},
-                                ),
-                            ],
-                            style={
-                                "display": "flex",
-                                "flexDirection": "column",
-                                "justifyContent": "center",
-                                "alignItems": "center",
-                                "height": "100%",
-                            },
-                        )
-                    ]
-                ),
-                color="light",
-                inverse=False,
-                style={"height": "200px"},
-            ),
-            width=4,
-        ),
-        dbc.Col(
-            dbc.Card(
-                dbc.CardBody(
-                    [
-                        html.Div(
-                            [
-                                html.H5(
-                                    "Number of Applications",
-                                    className="card-title",
-                                    style={"font-size": "1rem"},
-                                ),
-                                html.P(
-                                    id="azure-number-apps",
-                                    className="card-text",
-                                    style={"font-size": "2rem"},
-                                ),
-                            ],
-                            style={
-                                "display": "flex",
-                                "flexDirection": "column",
-                                "justifyContent": "center",
-                                "alignItems": "center",
-                                "height": "100%",
-                            },
-                        )
-                    ]
-                ),
-                color="light",
-                inverse=False,
-                style={"height": "200px"},
-            ),
-            width=4,
-        ),
-    ],
-    style={"marginBottom": "20px", "marginTop": "30px"},
-)
-
-content = html.Div(
-    [
-        html.Div(
-            [filters],
-            className="p-4",
-            style={
-                "background": "white",
-                "borderRadius": "8px",
-                "boxShadow": "0 2px 4px rgba(0,0,0,0.1)",
-            },
-        ),
-        insights_row_top,
-        # Add your dashboard content/cards here
-    ],
-    className="p-4",
-    style={"marginLeft": "250px"},
-)
+def fetch_azure_costs_data(start_date, end_date):
+    # fetch azure costs data
+    try:
+        query = select(AzureCosts).where(
+            (AzureCosts.date >= start_date) & (AzureCosts.date <= end_date)
+        )
+        with db.get_session() as session:
+            df = pd.read_sql(query, session.bind)
+        return df
+    except SQLAlchemyError as e:
+        logger.error(f"Error fetching data from AzureCosts: {str(e)}")
+        return pd.DataFrame()
 
 
-# Callbacks to handle toggle behavior for buttons
-@app.callback(
-    [
-        Output("dev-button", "color"),
-        Output("tst-button", "color"),
-        Output("acc-button", "color"),
-        Output("prd-button", "color"),
-    ],
-    [
-        Input("dev-button", "n_clicks"),
-        Input("tst-button", "n_clicks"),
-        Input("acc-button", "n_clicks"),
-        Input("prd-button", "n_clicks"),
-    ],
-)
-def toggle_environment(dev_clicks, tst_clicks, acc_clicks, prd_clicks):
-    def toggle_color(clicks):
-        return "primary" if clicks and clicks % 2 == 1 else "light"
-
-    return (
-        toggle_color(dev_clicks),
-        toggle_color(tst_clicks),
-        toggle_color(acc_clicks),
-        toggle_color(prd_clicks),
-    )
+logger.info("Fetch all Azure Costs data.")
+df_all = fetch_azure_costs_data(min_date, max_date)
 
 
-app.layout = html.Div([sidebar, content])
+app.layout = html.Div([dcc.Store(id="azure-costs-data-store"), sidebar, content])
 
 
 if __name__ == "__main__":
